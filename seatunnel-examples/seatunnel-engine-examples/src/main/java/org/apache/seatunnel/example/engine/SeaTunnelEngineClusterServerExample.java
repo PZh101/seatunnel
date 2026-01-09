@@ -30,6 +30,8 @@ public class SeaTunnelEngineClusterServerExample {
 
     public static void main(String[] args) throws CommandException {
         ServerCommandArgs serverCommandArgs = new ServerCommandArgs();
+        serverCommandArgs.setClusterName("seatunnel-example");
+        serverCommandArgs.setDaemonMode(true);
         SeaTunnel.run(serverCommandArgs.buildCommand());
     }
 }
