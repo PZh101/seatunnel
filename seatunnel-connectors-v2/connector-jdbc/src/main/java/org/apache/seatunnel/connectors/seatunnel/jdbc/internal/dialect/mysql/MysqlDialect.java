@@ -54,7 +54,8 @@ public class MysqlDialect implements JdbcDialect {
 
     public String fieldIde = FieldIdeEnum.ORIGINAL.getValue();
 
-    public MysqlDialect() {}
+    public MysqlDialect() {
+    }
 
     public MysqlDialect(String fieldIde) {
         this.fieldIde = fieldIde;
@@ -121,7 +122,11 @@ public class MysqlDialect implements JdbcDialect {
         PreparedStatement statement =
                 connection.prepareStatement(
                         queryTemplate, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        statement.setFetchSize(Integer.MIN_VALUE);
+        if (fetchSize >= 0) {
+            statement.setFetchSize(fetchSize);
+        } else {
+            statement.setFetchSize(Integer.MIN_VALUE);
+        }
         return statement;
     }
 
@@ -164,8 +169,8 @@ public class MysqlDialect implements JdbcDialect {
         }
 
         try (Statement stmt =
-                connection.createStatement(
-                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+                     connection.createStatement(
+                             ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
             stmt.setFetchSize(Integer.MIN_VALUE);
             try (ResultSet rs = stmt.executeQuery(sampleQuery)) {
                 int count = 0;
@@ -200,10 +205,10 @@ public class MysqlDialect implements JdbcDialect {
         boolean useTableStats =
                 StringUtils.isBlank(table.getQuery())
                         || (!table.getQuery().toLowerCase().contains("where")
-                                && table.getTablePath() != null
-                                && !TablePath.DEFAULT
-                                        .getFullName()
-                                        .equals(table.getTablePath().getFullName()));
+                        && table.getTablePath() != null
+                        && !TablePath.DEFAULT
+                        .getFullName()
+                        .equals(table.getTablePath().getFullName()));
 
         if (useTableStats) {
             // The statement used to get approximate row count which is less
