@@ -17,6 +17,7 @@
 
 package org.apache.seatunnel.connectors.seatunnel.jdbc.utils;
 
+import org.apache.seatunnel.connectors.seatunnel.jdbc.internal.dialect.kingbase.KingbaseDialect;
 import org.apache.seatunnel.shade.com.google.common.base.Strings;
 
 import org.apache.seatunnel.api.configuration.ReadonlyConfig;
@@ -144,6 +145,10 @@ public class JdbcCatalogUtils {
         try (Connection connection = getConnection(jdbcConnectionConfig, jdbcDialect)) {
             log.info("Loading catalog tables for jdbc : {}", jdbcConnectionConfig.getUrl());
             for (JdbcSourceTableConfig tableConfig : tablesConfig) {
+                //初始化兼容模式
+                if (jdbcDialect instanceof KingbaseDialect) {
+                    ((KingbaseDialect) jdbcDialect).initCompatibleLevel(connection);
+                }
                 CatalogTable catalogTable = getCatalogTable(tableConfig, connection, jdbcDialect);
                 TablePath tablePath = catalogTable.getTableId().toTablePath();
                 JdbcSourceTable jdbcSourceTable =
@@ -244,14 +249,14 @@ public class JdbcCatalogUtils {
                                 column ->
                                         columnsOfPath.containsKey(column.getName())
                                                 && columnsOfPath
-                                                        .get(column.getName())
-                                                        .getDataType()
-                                                        .getSqlType()
-                                                        .equals(
-                                                                columnsOfQuery
-                                                                        .get(column.getName())
-                                                                        .getDataType()
-                                                                        .getSqlType()))
+                                                .get(column.getName())
+                                                .getDataType()
+                                                .getSqlType()
+                                                .equals(
+                                                        columnsOfQuery
+                                                                .get(column.getName())
+                                                                .getDataType()
+                                                                .getSqlType()))
                         .map(column -> columnsOfPath.get(column.getName()))
                         .collect(Collectors.toList());
         boolean schemaIncludeAllColumns = columnsOfMerge.size() == columnKeysOfQuery.size();
@@ -324,33 +329,33 @@ public class JdbcCatalogUtils {
                         .map(
                                 column -> {
                                     return columnsOfPath.containsKey(column.getName())
-                                                    && columnsOfPath
+                                            && columnsOfPath
+                                            .get(column.getName())
+                                            .getDataType()
+                                            .getSqlType()
+                                            .equals(
+                                                    columnsOfQuery
                                                             .get(column.getName())
                                                             .getDataType()
-                                                            .getSqlType()
-                                                            .equals(
-                                                                    columnsOfQuery
-                                                                            .get(column.getName())
-                                                                            .getDataType()
-                                                                            .getSqlType())
+                                                            .getSqlType())
                                             ? PhysicalColumn.of(
-                                                    column.getName(),
-                                                    column.getDataType(),
-                                                    column.getColumnLength() == null
-                                                            ? null
-                                                            : Math.toIntExact(
-                                                                    column.getColumnLength()),
-                                                    column.isNullable(),
-                                                    column.getDefaultValue(),
-                                                    columnsOfPath
-                                                            .get(column.getName())
-                                                            .getComment(),
-                                                    column.getSourceType(),
-                                                    column.isUnsigned(),
-                                                    column.isZeroFill(),
-                                                    column.getBitLen(),
-                                                    column.getOptions(),
-                                                    column.getLongColumnLength())
+                                            column.getName(),
+                                            column.getDataType(),
+                                            column.getColumnLength() == null
+                                            ? null
+                                            : Math.toIntExact(
+                                                    column.getColumnLength()),
+                                            column.isNullable(),
+                                            column.getDefaultValue(),
+                                            columnsOfPath
+                                            .get(column.getName())
+                                            .getComment(),
+                                            column.getSourceType(),
+                                            column.isUnsigned(),
+                                            column.isZeroFill(),
+                                            column.getBitLen(),
+                                            column.getOptions(),
+                                            column.getLongColumnLength())
                                             : column;
                                 })
                         .collect(Collectors.toList());

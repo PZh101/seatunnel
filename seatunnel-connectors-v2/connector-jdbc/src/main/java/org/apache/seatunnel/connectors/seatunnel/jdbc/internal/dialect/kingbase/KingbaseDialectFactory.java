@@ -23,7 +23,9 @@ import org.apache.seatunnel.connectors.seatunnel.jdbc.internal.dialect.JdbcDiale
 
 import com.google.auto.service.AutoService;
 
-/** Factory for {@link KingbaseDialect}. */
+/**
+ * Factory for {@link KingbaseDialect}.
+ */
 @AutoService(JdbcDialectFactory.class)
 public class KingbaseDialectFactory implements JdbcDialectFactory {
 
@@ -39,6 +41,11 @@ public class KingbaseDialectFactory implements JdbcDialectFactory {
 
     @Override
     public JdbcDialect create() {
-        return new KingbaseDialect();
+        return new KingbaseDialect(null);
+    }
+
+    @Override
+    public JdbcDialect create(String compatibleMode, String fieldId) {
+        return new KingbaseDialect(compatibleMode);
     }
 }
