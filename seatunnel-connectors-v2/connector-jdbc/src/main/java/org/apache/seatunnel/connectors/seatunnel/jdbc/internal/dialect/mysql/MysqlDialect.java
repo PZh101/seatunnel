@@ -122,7 +122,7 @@ public class MysqlDialect implements JdbcDialect {
         PreparedStatement statement =
                 connection.prepareStatement(
                         queryTemplate, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        if (fetchSize >= 0) {
+        if (fetchSize > 0) {
             statement.setFetchSize(fetchSize);
         } else {
             statement.setFetchSize(Integer.MIN_VALUE);
